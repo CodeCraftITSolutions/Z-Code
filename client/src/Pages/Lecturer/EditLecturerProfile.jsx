@@ -49,9 +49,9 @@ const EditLecturerProfile = (props) => {
       toast.error(error);
     }
     finally{
-      setUploading(false);
-      props.cancel();
-      toast.success('Profile Updated Successfully');
+      // setUploading(false);
+      // props.cancel();
+      // toast.success('Profile Updated Successfully');
     }
 
 
@@ -79,6 +79,11 @@ const EditLecturerProfile = (props) => {
       const data = await res.data;
     } catch (error) {
       // toast("error uploading image",error);
+    }
+    finally{
+      setUploading(false);
+      props.cancel();
+      toast.success('Profile Updated Successfully');
     }
 
   };
