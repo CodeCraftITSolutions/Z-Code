@@ -21,6 +21,7 @@ const Layout = ({ bgColor,isLecturer }) => {
   const user = useSelector(state => state.user);
   const [isApproved, setIsApproved] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [refreshImage, setRefreshImage] = useState(false);
 
 
   useEffect(() => {
@@ -57,6 +58,10 @@ const Layout = ({ bgColor,isLecturer }) => {
     fetchLecturer();
   }, [user]);
 
+  const fetchImageHandler = () => {
+    setRefreshImage((prev) => !prev); // Toggle to signal Header to refetch image
+  };
+
   const fetchLecturer = async () => {
     setLoading(true);
     try {
@@ -79,8 +84,8 @@ const Layout = ({ bgColor,isLecturer }) => {
     <div className="w-full h-screen flex justify-between items-start">
   {!isLecturer ?  <Sidebar /> : <SidebarLecturer isApproved = {isApproved}/>}
       <div className={`w-full lg:w-4/5 grow bg-white h-screen overflow-y-auto flex flex-col justify-start items-center gap-4 p-4`}>
-        <Header bgColor={bgColor} />
-        <Outlet />
+        <Header bgColor={bgColor} refreshImage={refreshImage} />
+        <Outlet context={{fetchImageHandler}}/>
       </div>
     </div>
   );

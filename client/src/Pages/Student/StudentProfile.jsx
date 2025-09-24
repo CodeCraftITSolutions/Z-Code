@@ -8,11 +8,14 @@ import { useNavigate } from "react-router-dom";
 import 'react-toastify/dist/ReactToastify.css';
 import client_ from "../../assets/Images/profile.jpg";
 
+
 import { ToastContainer, toast } from 'react-toastify';
 import { useSelector } from "react-redux";
 import ClipLoader from "react-spinners/ClipLoader";
 import { CSSProperties } from "react";
 import { backendUrl } from "../../../config";
+import { useOutletContext } from "react-router-dom";
+
 
 const override = {
   display: "block",
@@ -30,6 +33,7 @@ const StudentProfile = () => {
   const [student, setStudent] = useState(null);
   const [editProfile, setEditProfile] = useState(false);
   const [client, setClient] = useState(client_);
+  const {fetchImageHandler} = useOutletContext();
 
   useEffect(() => {
     fetchStudent();
@@ -72,7 +76,9 @@ const StudentProfile = () => {
 
   const cancel = () => {
     setEditProfile(false);
-    window.location.reload();
+    fetchImageHandler();
+    fecthImage();
+    // window.location.reload();
   };
 
   

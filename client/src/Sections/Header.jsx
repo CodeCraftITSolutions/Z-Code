@@ -11,7 +11,7 @@ import classNames from "classnames";
 import ClipLoader from "react-spinners/ClipLoader";
 import { CSSProperties } from "react";
 import logo from "../assets/Images/profile.jpg";
-import { backendUrl } from "../../config.js";
+import { backendUrl } from "../../config";
 import Notify from "../Components/Notify";
 import useFetchUser from "../hooks/fetchUser";
 import io from "socket.io-client";
@@ -25,7 +25,7 @@ const override = {
 
 axios.defaults.withCredentials = true;
 
-const Header = ({ bgColor }) => {
+const Header = ({ bgColor, refreshImage }) => {
   const shouldLog = useRef(true);
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -35,7 +35,9 @@ const Header = ({ bgColor }) => {
 
   useEffect(() => {
     fecthImage();
-  }, [user]);
+  }, [user,refreshImage]);
+
+  
 
 
   useEffect(() => {
@@ -68,6 +70,7 @@ const Header = ({ bgColor }) => {
 
 
   const fecthImage = async () => {
+    console.log("fetching image");
     setLoading(true);
     try {
       if (user._id === undefined) return;

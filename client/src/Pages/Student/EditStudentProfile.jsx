@@ -32,7 +32,9 @@ const EditStudentProfile = (props) => {
     reader.readAsDataURL(file);
     reader.onloadend = () => {
       setImage(reader.result);
+      console.log('reader', reader.result);  
     };
+    
   };
 
   const save = async () => {
@@ -53,21 +55,28 @@ const EditStudentProfile = (props) => {
       toast.error(err.message);
     }
     finally{
-      setUploading(false);
-      props.cancel();
-      toast.success('Profile Updated Successfully');
+      // setUploading(false);
+      // props.cancel();
+      // toast.success('Profile Updated Successfully');
     }
   };
 
   const uploadImage = async (image) => {
     try {
       const res = await axios.post(url, { image, userId });
+      console.log("response",res);
       if (res.status === 200) {
-        toast.success('Image Uploaded Successfully');
+        // toast.success('Image Uploaded Successfully');
+        console.log("Image Uploaded Successfully");
       }
     } catch (error) {
       // toast.error("Error in uploading image");
     } 
+    finally{
+      setUploading(false);
+      props.cancel();
+      toast.success('Profile Updated Successfully');
+    }
   };
 
   const handleUploadButtonClick = () => {
@@ -78,25 +87,36 @@ const EditStudentProfile = (props) => {
   };
 
   const handleDeleteButtonClick = async () => {
+    if(image === Logo)return;
     setUploading(true);
     try {
       const res = await axios.delete(`${backendUrl}/api/image/${userId}`);
       if (res.status === 200) {
-        setImage(Logo);
         toast.success('Image Deleted Successfully');
+        setImage(Logo);
       }
     } catch (error) {
-      toast.error("Error in deleting image");
+      // toast.error("Error in deleting image");
     } finally {
       setUploading(false);
+      setImage(Logo);
+      
     }
   };
+
+  function handleTest() {
+    console.log("Test");
+    console.log(image);
+  }
 
   return (
     <div className="relative max-w-md mx-auto md:max-w-2xl mt-10 md:mt-20 px-4">
     <div className="bg-blue-900 rounded-lg shadow-lg p-6">
       <div className="flex flex-col items-center">
         <div className="relative overflow-hidden mb-4">
+          <button onClick={handleTest}>
+            Test
+          </button>
           <input
             onChange={handleImage}
             type="file"
