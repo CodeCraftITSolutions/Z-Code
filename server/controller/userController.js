@@ -79,7 +79,8 @@ const sendOtp = async (req, res) => {
         });
 
         let mailOptions = {
-            from: "farhadfd818@gmail.com",
+            // from: "farhadfd818@gmail.com",
+            from : process.env.MAIL_USERNAME,
             to: email,
             subject: 'Account Verification',
             text: `OTP is ${otp}  This OTP will expire in 5 minutes`
@@ -87,6 +88,7 @@ const sendOtp = async (req, res) => {
 
         transporter.sendMail(mailOptions, function (err, data) {
             if (err) {
+                console.log(err);
                 return res.status(400).json({ error: `${err}` });
 
             } else {
@@ -495,7 +497,8 @@ const forgotPassword =
             });
 
             let mailOptions = {
-                from: "farhadfd818@gmail.com",
+                // from: "farhadfd818@gmail.com",
+                from : process.env.MAIL_USERNAME,
                 to: email,
                 subject: 'Reset Password',
                 text: `This link will expire in 5 minutes\nhttps://zee-code-3234074b267f.herokuapp.com/reset/${token}`
@@ -503,6 +506,7 @@ const forgotPassword =
 
             transporter.sendMail(mailOptions, function (err, data) {
                 if (err) {
+                    console.log(err)
                     return res.status(400).json({ error: `${err}` });
                 } else {
                     return res.status(200).json({ msg: `Check your email for the password reset link` });
