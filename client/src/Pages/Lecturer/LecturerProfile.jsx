@@ -10,6 +10,7 @@ axios.defaults.withCredentials = true;
 import ClipLoader from "react-spinners/ClipLoader";
 import {  CSSProperties } from "react";
 import { backendUrl } from "../../../config";
+import {useOutletContext} from "react-router-dom";
 
 const override = {
   display: "block",
@@ -25,6 +26,9 @@ const LecturerProfile = () => {
   const [lecturer,setLecturer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [client, setClient] = useState(client_);
+  const {fetchImageHandler} = useOutletContext();
+  const shouldLog = useRef(true);
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -72,7 +76,9 @@ const LecturerProfile = () => {
 
   const cancel = () => {
     setEditProfile(false);
-    window.location.reload();
+    fetchImageHandler();
+    fecthImage();
+    // window.location.reload();
   };
 
   return (
