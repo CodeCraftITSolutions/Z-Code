@@ -12,7 +12,7 @@ const app = require("./app")
 const server = http.createServer(app);
 
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? ['https://zee-code-3234074b267f.herokuapp.com']
+  ? ['https://z-code-server.onrender.com']
   : ['http://localhost:5173', 'https://zee-code-3234074b267f.herokuapp.com']; // Add other local origins if necessary
 
 
