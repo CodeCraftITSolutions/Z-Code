@@ -1,1 +1,1 @@
-export const backendUrl = "https://z-code-server.onrender.com";
+export const backendUrl = "https://z-code-cpyg.onrender.com/";

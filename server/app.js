@@ -8,8 +8,8 @@ app.use(cookieParser());
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb', extended: true, parameterLimit: 50000}));
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? ['https://z-code-ia0a.onrender.com']
-  : ['http://localhost:5173', 'https://z-code-ia0a.onrender.com']; // Add other local origins if necessary
+  ? ['https://z-code-1-eqrq.onrender.com/']
+  : ['http://localhost:5173', 'https://z-code-1-eqrq.onrender.com/']; // Add other local origins if necessary
 
 app.use(cors({
   credentials: true,
