@@ -12,8 +12,8 @@ const app = require("./app")
 const server = http.createServer(app);
 
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? ['https://z-code-1-eqrq.onrender.com/']
-  : ['http://localhost:5173', 'https://z-code-1-eqrq.onrender.com/']; // Add other local origins if necessary
+  ? ['https://z-code-1-eqrq.onrender.com']
+  : ['http://localhost:5173', 'https://z-code-1-eqrq.onrender.com']; // Add other local origins if necessary
 
 
 
