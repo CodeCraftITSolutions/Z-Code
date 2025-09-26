@@ -9,6 +9,9 @@ const Otp = require('../models/otp');
 
 const crypto = require('crypto');
 
+const COOKIE_NAME = 'auth';
+const isProd = process.env.NODE_ENV === 'production';
+
 function generateSecureOTP(length) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const charsLength = chars.length;
@@ -161,14 +164,21 @@ const google = async (req, res) => {
             req.cookies[`${user._id}`] = '';
         }
 
-        res.cookie(String(user._id), token, {
-            path: '/',
-            httpOnly: true,
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-            sameSite: 'lax'
-        });
+        // res.cookie(String(user._id), token, {
+        //     path: '/',
+        //     httpOnly: true,
+        //     expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        //     sameSite: 'lax'
+        // });
+        res.cookie(COOKIE_NAME, token, {
+  httpOnly: true,
+  sameSite: isProd ? 'none' : 'lax',
+  secure: isProd,
+  path: '/',
+  maxAge: 1000 * 60 * 60 * 24 // 1 day
+});
 
-        req.cookies.remo
+        req.cookies.remove(COOKIE_NAME);
         req.cookies[`${user._id}`] = token;
 
         return res.status(200).json({ msg: 'User created successfully', user });
@@ -268,22 +278,31 @@ const login = async (req, res) => {
         );
 
 
-        if (req.cookies[`${user._id}`]) {
-            req.cookies[`${user._id}`] = '';
-        }
+        // if (req.cookies[`${user._id}`]) {
+        //     req.cookies[`${user._id}`] = '';
+        // }
 
 
 
-        // Set the new cookie
-        res.cookie(String(user._id), token, {
-            path: '/',
-            httpOnly: true,
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-            sameSite: 'lax'
-        });
+        // // Set the new cookie
+        // res.cookie(String(user._id), token, {
+        //     path: '/',
+        //     httpOnly: true,
+        //     expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        //     sameSite: 'lax'
+        // });
 
-        req.cookies.remo
-        req.cookies[`${user._id}`] = token;
+    res.cookie(COOKIE_NAME, token, {
+      httpOnly: true,
+      // If frontend & backend are on different domains, you MUST use:
+      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd, // required for SameSite=None
+      path: '/',      // ok to keep
+      // Do NOT set domain unless necessary; let it default to API host
+      maxAge: 1000 * 60 * 60 * 24
+    });
+
+        // req.cookies[`${user._id}`] = token;
 
         let userType = '';
         if (user.usertype === 'lecturer') {
@@ -320,22 +339,32 @@ const googlelogin = async (req, res) => {
         );
 
 
-        if (req.cookies[`${user._id}`]) {
-            req.cookies[`${user._id}`] = '';
-        }
+        // if (req.cookies[`${user._id}`]) {
+        //     req.cookies[`${user._id}`] = '';
+        // }
 
 
 
         // Set the new cookie
-        res.cookie(String(user._id), token, {
-            path: '/',
-            httpOnly: true,
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-            sameSite: 'lax'
-        });
+        // res.cookie(String(user._id), token, {
+        //     path: '/',
+        //     httpOnly: true,
+        //     expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        //     sameSite: 'lax'
+        // });
 
-        req.cookies.remo
-        req.cookies[`${user._id}`] = token;
+    res.cookie(COOKIE_NAME, token, {
+      httpOnly: true,
+      // If frontend & backend are on different domains, you MUST use:
+      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd, // required for SameSite=None
+      path: '/',      // ok to keep
+      // Do NOT set domain unless necessary; let it default to API host
+      maxAge: 1000 * 60 * 60 * 24
+    });
+
+        // req.cookies.remo
+        // req.cookies[`${user._id}`] = token;
 
         let userType = '';
         if (user.usertype === 'lecturer') {
@@ -359,111 +388,172 @@ const googlelogin = async (req, res) => {
 
 
 
+// const verifyToken = (req, res, next) => {
+//     const cookie = req.headers.cookie;
+
+
+//     if (!cookie) {
+//         res.status(401).json({ error: 'Cookie Expired Please login again' });
+//         return;
+//     }
+//     const token = cookie.split('=')[1];
+//     if (token == null) {
+//         res.status(401).json({ error: 'Unauthorized' });
+//         return;
+//     }
+
+
+
+
+//     jwt.verify(String(token), process.env.ACCESS_TOKEN, (err, user) => {
+//         if (err) {
+//             cookie.split(';').forEach(cookie => {
+//                 const name = cookie.split('=')[0].trim();
+//                 res.clearCookie(name, { path: '/' });
+//             });
+//             res.status(403).json({ error: 'Invalid Token' });
+//             return
+//             // return;
+//         }
+//         else {
+//             // res.status(200).json({msg: 'success'});
+//             req.id = user.id;
+//             next();
+
+
+//         }
+
+
+//     })
+
+
+// }
+
 const verifyToken = (req, res, next) => {
-    const cookie = req.headers.cookie;
-
-
-    if (!cookie) {
-        res.status(401).json({ error: 'Cookie Expired Please login again' });
-        return;
+    const token = req.cookies[COOKIE_NAME];
+    if (!token) {
+        return res.status(401).json({ error: 'Cookie Expired Please login again' });
     }
-    const token = cookie.split('=')[1];
-    if (token == null) {
-        res.status(401).json({ error: 'Unauthorized' });
-        return;
-    }
-
-
-
-
     jwt.verify(String(token), process.env.ACCESS_TOKEN, (err, user) => {
         if (err) {
-            cookie.split(';').forEach(cookie => {
-                const name = cookie.split('=')[0].trim();
-                res.clearCookie(name, { path: '/' });
-            });
-            res.status(403).json({ error: 'Invalid Token' });
-            return
-            // return;
+            res.clearCookie(COOKIE_NAME, { path: '/' });
+            return res.status(403).json({ error: 'Invalid Token' });
         }
-        else {
-            // res.status(200).json({msg: 'success'});
-            req.id = user.id;
-            next();
-
-
-        }
-
-
-    })
-
-
-}
-
-const getUser = async (req, res) => {
-    const cookie = req.headers.cookie;
-    try {
-        const userId = req.id;
-        if (!userId) {
-            return res.status(400).json({ error: 'User ID not provided' });
-        }
-
-        const user = await User.findById(userId, '-password');
-        if (!user) {
-            res.clearCookie(String(req.id));
-            req.cookies[`${req.id}`] = '';
-            return res.status(404).json({ error: 'User not found' });
-
-        }
-
-        return res.status(200).json({ user });
-    } catch (error) {
-        return res.status(500).json({ error: 'Internal Server Error' });
-    }
-}
-
-const refreshToken = async (req, res, next) => {
-    const cookie = req.headers.cookie;
-    if (!cookie) {
-        return res.status(401).json({ error: 'Cookie expired please login again' });
-    }
-    const token = cookie.split('=')[1];
-    if (token == null) {
-        return res.status(401).json({ error: 'Token not found' });
-    }
-    jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
-        if (err) {
-            cookie.split(';').forEach(cookie => {
-                const name = cookie.split('=')[0].trim();
-                res.clearCookie(name, { path: '/' });
-            });
-            return res.status(403).json({ error: 'Authentication Failed' });
-        }
-
-        res.clearCookie(`${user.id}`)
-        req.cookies[`${user.id}`] = '';
-
-
-        const token = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN, {
-            expiresIn: '7d'
-        })
-
-
-        res.cookie(String(user.id), token, {
-            path: '/',
-            httpOnly: true,
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-            sameSite: 'lax'
-        })
-
-
         req.id = user.id;
         next();
-    })
-
-
+    });
 }
 
+// const getUser = async (req, res) => {
+//     const cookie = req.headers.cookie;
+//     try {
+//         const userId = req.id;
+//         if (!userId) {
+//             return res.status(400).json({ error: 'User ID not provided' });
+//         }
+
+//         const user = await User.findById(userId, '-password');
+//         if (!user) {
+//             res.clearCookie(String(req.id));
+//             req.cookies[`${req.id}`] = '';
+//             return res.status(404).json({ error: 'User not found' });
+
+//         }
+
+//         return res.status(200).json({ user });
+//     } catch (error) {
+//         return res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// }
+
+// const refreshToken = async (req, res, next) => {
+//     const cookie = req.headers.cookie;
+//     if (!cookie) {
+//         return res.status(401).json({ error: 'Cookie expired please login again' });
+//     }
+//     const token = cookie.split('=')[1];
+//     if (token == null) {
+//         return res.status(401).json({ error: 'Token not found' });
+//     }
+//     jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
+//         if (err) {
+//             cookie.split(';').forEach(cookie => {
+//                 const name = cookie.split('=')[0].trim();
+//                 res.clearCookie(name, { path: '/' });
+//             });
+//             return res.status(403).json({ error: 'Authentication Failed' });
+//         }
+
+//         res.clearCookie(`${user.id}`)
+//         req.cookies[`${user.id}`] = '';
+
+
+//         const token = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN, {
+//             expiresIn: '7d'
+//         })
+
+
+//         res.cookie(String(user.id), token, {
+//             path: '/',
+//             httpOnly: true,
+//             expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+//             sameSite: 'lax'
+//         })
+
+
+//         req.id = user.id;
+//         next();
+//     })
+
+
+// }
+
+const getUser = async (req, res) => {
+  try {
+    const userId = req.id; // set by verifyToken middleware
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID not provided' });
+    }
+
+    const user = await User.findById(userId, '-password');
+    if (!user) {
+      // Clear the stable cookie name only
+      res.clearCookie(COOKIE_NAME, {
+        path: '/',
+        sameSite: isProd ? 'none' : 'lax',
+        secure: isProd
+      });
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const refreshToken = async (req, res, next) => {
+    const token = req.cookies[COOKIE_NAME];
+    if (!token) {
+        return res.status(401).json({ error: 'Cookie expired please login again' });
+    }
+    jwt.verify(String(token), process.env.ACCESS_TOKEN, (err, user) => {
+        if (err) {
+            res.clearCookie(COOKIE_NAME, { path: '/' });
+            return res.status(403).json({ error: 'Invalid Token' });
+        }
+        const newToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN, { expiresIn: '1d' });
+    res.cookie(COOKIE_NAME, newToken, {
+      httpOnly: true,
+      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd,
+      path: '/',
+      maxAge: 1000 * 60 * 60 * 24
+    });
+        req.id = user.id;
+        next();
+    });
+}
 
 const forgotPassword =
     async (req, res) => {
@@ -554,28 +644,37 @@ const resetPassword =
     }
 
 
-const logout = (req, res, next) => {
+// const logout = (req, res, next) => {
 
-    const cookie = req.headers.cookie;
-    if (!cookie) {
-        return res.status(401).json({ error: 'Session Expired Please login again' });
-    }
-    const token = cookie.split('=')[1];
-    if (token == null) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-    jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
-        if (err) {
-            return res.status(403).json({ error: 'Forbidden' });
-        }
-        req.id = user.id;
-    })
-    res.clearCookie(String(req.id));
-    req.cookies[`${req.id}`] = '';
-    return res.status(200).json({ msg: 'Logged out successfully' });
+//     const cookie = req.headers.cookie;
+//     if (!cookie) {
+//         return res.status(401).json({ error: 'Session Expired Please login again' });
+//     }
+//     const token = cookie.split('=')[1];
+//     if (token == null) {
+//         return res.status(401).json({ error: 'Unauthorized' });
+//     }
+//     jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
+//         if (err) {
+//             return res.status(403).json({ error: 'Forbidden' });
+//         }
+//         req.id = user.id;
+//     })
+//     res.clearCookie(String(req.id));
+//     req.cookies[`${req.id}`] = '';
+//     return res.status(200).json({ msg: 'Logged out successfully' });
 
 
-}
+// }
+
+const logout = (req, res) => {
+  const token = req.cookies?.[COOKIE_NAME];
+  if (!token) return res.status(401).json({ error: 'Session expired. Please login again' });
+
+  // Optional: verify before clearing, or just clear:
+  res.clearCookie(COOKIE_NAME, { path: '/', sameSite: isProd ? 'none' : 'lax', secure: isProd });
+  return res.status(200).json({ msg: 'Logged out successfully' });
+};
 
 
 
