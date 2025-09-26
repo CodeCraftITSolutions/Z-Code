@@ -327,12 +327,24 @@ const googlelogin = async (req, res) => {
 
 
         // Set the new cookie
-        res.cookie(String(user._id), token, {
-            path: '/',
-            httpOnly: true,
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-            sameSite: 'lax'
-        });
+        // res.cookie(String(user._id), token, {
+        //     path: '/',
+        //     httpOnly: true,
+        //     expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        //     sameSite: 'lax'
+        // });
+
+        const isProd = process.env.NODE_ENV === 'production';
+
+    res.cookie('auth', token, {
+      httpOnly: true,
+      // If frontend & backend are on different domains, you MUST use:
+      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd, // required for SameSite=None
+      path: '/',      // ok to keep
+      // Do NOT set domain unless necessary; let it default to API host
+      maxAge: 1000 * 60 * 60 * 24
+    });
 
         req.cookies.remo
         req.cookies[`${user._id}`] = token;
